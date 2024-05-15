@@ -11,7 +11,11 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { getDistance } from "geolib";
 
 const Pickup = () => {
@@ -43,7 +47,6 @@ const Pickup = () => {
         }
       );
     }
-
     fetchData();
   }, []);
 
@@ -86,7 +89,7 @@ const Pickup = () => {
   }
   if (!location) {
     return (
-      <ActivityIndicator size={"large"} color={"#000"} style={styles.lodding} />
+      <ActivityIndicator size={"large"} color={"#000"} style={styles.loading} />
     );
   }
 
@@ -138,25 +141,46 @@ const Pickup = () => {
           </View>
         </>
       )}
-      <View style={styles.placesContainer}>
+      <View
+        style={{
+          borderBottomColor: "lightgray",
+          marginTop: 10,
+          borderBottomWidth: 1,
+          width: "100%",
+        }}
+      >
         <Text
           style={{
             textAlign: "center",
-            marginBottom: 15,
+            marginBottom: 10,
+            fontSize: 16,
             fontWeight: 600,
           }}
         >
           Good Morning, Jost
         </Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Where to?"
-          value={inputText}
-          onChangeText={(text) => {
-            handleChange(text);
-            setInputText(text);
-          }}
-        />
+      </View>
+      <View style={styles.placesContainer}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Where to?"
+            value={inputText}
+            onChangeText={(text) => {
+              handleChange(text);
+              setInputText(text);
+            }}
+          />
+          <MaterialCommunityIcons
+            name="car-clock"
+            size={24}
+            style={{
+              color: "#7C7C7C",
+              borderLeftWidth: 1,
+              borderLeftColor: "#7C7C7C",
+              paddingLeft: 15,
+            }}
+          />
+        </View>
         {places.length > 0 && (
           <FlatList
             style={styles.placesList}
@@ -246,7 +270,7 @@ const Pickup = () => {
 export default Pickup;
 
 const styles = StyleSheet.create({
-  lodding: {
+  loading: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -264,13 +288,20 @@ const styles = StyleSheet.create({
     gap: 16,
     marginTop: 15,
   },
-  input: {
-    backgroundColor: "#E2E2E2",
-    padding: 10,
-    borderRadius: 3,
-  },
   placesContainer: {
     padding: 15,
+  },
+  inputContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 3,
+    display: "flex",
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    backgroundColor: "#E2E2E2",
   },
   placesList: {
     zIndex: 99999,

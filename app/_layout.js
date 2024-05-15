@@ -21,7 +21,8 @@ export default function Layout() {
                   width: "100%",
                   justifyContent: "center",
                   alignItems: "center",
-                  borderBottomColor: "#f4f4f4",
+                  borderBottomColor: "lightgray",
+                  marginBottom: 10,
                   borderBottomWidth: 1,
                 }}
               >
@@ -51,6 +52,7 @@ export default function Layout() {
           drawerStyle: {
             backgroundColor: "#F6F6F6",
           },
+          overlayColor: "#000",
           drawerActiveBackgroundColor: "#000",
           drawerActiveTintColor: "#fff",
         }}

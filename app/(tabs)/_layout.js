@@ -5,7 +5,11 @@ import { StyleSheet, View, Text } from "react-native";
 
 export default function TabLayout() {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarIconStyle: { display: "none" },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{

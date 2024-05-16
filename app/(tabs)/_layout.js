@@ -17,7 +17,7 @@ export default function TabLayout() {
           tabBarLabel: ({ focused }) => (
             <TabLabel
               label="Rides"
-              icon={<Ionicons size={28} name="car-sport" />}
+              icon={<Ionicons size={24} name="car-sport" />}
               focused={focused}
             />
           ),
@@ -31,7 +31,7 @@ export default function TabLayout() {
           tabBarLabel: ({ focused }) => (
             <TabLabel
               label="Eats"
-              icon={<FontAwesome size={28} name="cutlery" />}
+              icon={<FontAwesome size={24} name="cutlery" />}
               focused={focused}
             />
           ),

@@ -163,7 +163,9 @@ const Pickup = () => {
       <View style={styles.placesContainer}>
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder="Where to?"
+            style={{ fontSize: 16 }}
+            placeholderTextColor="#000000"
+            placeholder="Where to ?"
             value={inputText}
             onChangeText={(text) => {
               handleChange(text);

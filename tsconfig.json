@@ -15,7 +15,7 @@
     "app/+html.js",
     "app/_layout.js",
     "app/(tabs)/index.js",
-    "app/(tabs)/lunch.js",
+    "app/(tabs)/lunch/lunch.js",
     "app/(tabs)/_layout.js"
   ]
 }

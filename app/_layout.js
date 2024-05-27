@@ -82,9 +82,19 @@ export default function Layout() {
             ),
           }}
         />
+        <Drawer.Screen
+          name="booking/booking"
+          options={{
+            drawerLabel: "Booking",
+            title: "Booking",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="location-outline" size={size} color={color} />
+            ),
+          }}
+        />
 
         <Drawer.Screen
-          name="Profile"
+          name="profile/profile"
           options={{
             drawerLabel: "Profile",
             title: "Profile",
@@ -95,17 +105,7 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="Setting"
-          options={{
-            drawerLabel: "Settings",
-            title: "Settings",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="settings-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="Contact"
+          name="contact/contact"
           options={{
             drawerLabel: "Contact",
             title: "Contact",
@@ -116,16 +116,12 @@ export default function Layout() {
         />
 
         <Drawer.Screen
-          name="Support"
+          name="setting/setting"
           options={{
-            drawerLabel: "Support",
-            title: "Support",
+            drawerLabel: "Settings",
+            title: "Settings",
             drawerIcon: ({ color, size }) => (
-              <MaterialCommunityIcons
-                name="account-check-outline"
-                size={size}
-                color={color}
-              />
+              <Ionicons name="settings-outline" size={size} color={color} />
             ),
           }}
         />

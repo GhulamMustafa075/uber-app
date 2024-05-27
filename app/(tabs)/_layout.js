@@ -25,7 +25,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="lunch"
+        name="lunch/lunch"
         options={{
           headerShown: false,
           tabBarLabel: ({ focused }) => (
@@ -63,6 +63,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginTop: 3,
     marginBottom: 3,
+    borderWidth: 1,
+    borderColor: "#fff",
   },
   tabLabelText: {
     marginLeft: 8,

@@ -3,90 +3,114 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   SafeAreaView,
   ActivityIndicator,
-  FlatList,
+  Image,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
-import {
-  AntDesign,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
 import { getDistance } from "geolib";
 
 const Pickup = () => {
   const [location, setLocation] = useState(null);
+  const [destinationPoint, setDestinationPoint] = useState(null);
+  const [startPointData, setStartPointData] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [places, setPlaces] = useState([]);
-
-  const [pickup, setPickup] = useState(null);
-  const [inputText, setInputText] = useState("");
-  const [distance, setdistance] = useState("");
   const mapRef = useRef(null);
+  const { startPoint, destination, focusedIcon } = useLocalSearchParams();
+  const [distance, setDistance] = useState(null);
 
   useEffect(() => {
-    async function fetchData() {
+    if (startPoint && destination) {
+      const start = JSON.parse(startPoint);
+      const end = JSON.parse(destination);
+      setStartPointData(start);
+      setDestinationPoint(end);
+      calculateDistance(start.geocodes.main, end.geocodes.main);
+    }
+  }, [startPoint, destination]);
+
+  useEffect(() => {
+    (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied");
         return;
       }
 
-      Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          distanceInterval: 1,
-          timeInterval: 1000,
-        },
-        (newLocation) => {
-          setLocation(newLocation);
-        }
-      );
-    }
-    fetchData();
-  }, []);
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
 
-  const handleChange = (text) => {
-    setTimeout(() => searchPlaces(text), 800);
-  };
+      if (mapRef.current && startPoint && destination) {
+        const start = JSON.parse(startPoint);
+        const end = JSON.parse(destination);
+        mapRef.current.fitToCoordinates(
+          [
+            {
+              latitude: start.geocodes.main.latitude,
+              longitude: start.geocodes.main.longitude,
+            },
+            {
+              latitude: end.geocodes.main.latitude,
+              longitude: end.geocodes.main.longitude,
+            },
+          ],
+          {
+            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+            animated: true,
+          }
+        );
+      }
+    })();
+  }, [startPoint, destination]);
 
-  const calculateDistance = (itemLat, itemLog) => {
-    var dis = getDistance(
-      {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      },
-      { latitude: itemLat, longitude: itemLog }
+  const calculateDistance = (start, end) => {
+    const distanceInMeters = getDistance(
+      { latitude: start.latitude, longitude: start.longitude },
+      { latitude: end.latitude, longitude: end.longitude }
     );
-    // alert(`Distance\n\n${dis} Meter\nOR\n${dis / 1000} KM`);
-    setdistance(dis);
-    console.log(dis, "distance");
+    setDistance(distanceInMeters);
   };
 
-  const searchPlaces = async (text) => {
-    const options = {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: "fsq3mvUGiD+3ms10/xcy7LGd3r50NvPEQbZPvCemQC5TMV8=",
-      },
-    };
-    fetch(`https://api.foursquare.com/v3/places/search?query=${text}`, options)
-      .then((response) => response.json())
-      .then((response) => {
-        console.log("response", response);
-        setPlaces(response.results);
-      })
-      .catch((err) => console.error(err, "eeror"));
+  const resetMarkers = () => {
+    setStartPointData(null);
+    setDestinationPoint(null);
+    setDistance(null);
+    router.push("/(tabs)");
+  };
+
+  const getIcon = () => {
+    switch (focusedIcon) {
+      case "motorbike":
+        return require("../../assets/images/desBike.png");
+      case "rickshaw":
+        return require("../../assets/images/desRickshaw.png");
+      case "car-side":
+        return require("../../assets/images/desCar.png");
+      default:
+        return require("../../assets/images/desBike.png");
+    }
+  };
+
+  const CustomMarker = ({ coordinate, title, icon }) => {
+    return (
+      <Marker coordinate={coordinate} title={title}>
+        <Image
+          source={icon}
+          style={{ width: 40, height: 40 }}
+          resizeMode="contain"
+        />
+      </Marker>
+    );
   };
 
   if (errorMsg) {
     return <Text>{errorMsg}</Text>;
   }
+
   if (!location) {
     return (
       <ActivityIndicator size={"large"} color={"#000"} style={styles.loading} />
@@ -105,166 +129,70 @@ const Pickup = () => {
           longitudeDelta: 0.0421,
         }}
       >
-        <Marker
-          coordinate={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          }}
-          title={"Your Location"}
-        />
-        {pickup && (
+        {!startPointData && !destinationPoint && (
           <Marker
             coordinate={{
-              latitude: pickup.geocodes.main.latitude,
-              longitude: pickup.geocodes.main.longitude,
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
             }}
-            title={pickup.name}
+            title={"Your Location"}
+          />
+        )}
+        {startPointData && (
+          <CustomMarker
+            coordinate={{
+              latitude: startPointData.geocodes.main.latitude,
+              longitude: startPointData.geocodes.main.longitude,
+            }}
+            title={startPointData.name}
+            icon={getIcon()}
+          />
+        )}
+        {destinationPoint && (
+          <Marker
+            coordinate={{
+              latitude: destinationPoint.geocodes.main.latitude,
+              longitude: destinationPoint.geocodes.main.longitude,
+            }}
+            title={destinationPoint.name}
+          />
+        )}
+        {startPointData && destinationPoint && (
+          <Polyline
+            coordinates={[
+              {
+                latitude: startPointData.geocodes.main.latitude,
+                longitude: startPointData.geocodes.main.longitude,
+              },
+              {
+                latitude: destinationPoint.geocodes.main.latitude,
+                longitude: destinationPoint.geocodes.main.longitude,
+              },
+            ]}
+            strokeColor="#000"
+            strokeWidth={3}
           />
         )}
       </MapView>
-      {pickup && (
+      {!startPointData || !destinationPoint ? (
+        <View style={styles.directionBtn}>
+          <TouchableOpacity onPress={() => router.push("/booking")}>
+            <FontAwesome5 name="directions" size={38} />
+          </TouchableOpacity>
+        </View>
+      ) : (
         <>
-          <View style={styles.cancleBtn}>
-            <TouchableOpacity
-              onPress={() => {
-                setPickup(null);
-                setPlaces([]);
-                setInputText("");
-              }}
-            >
+          <View style={styles.cancelBtn}>
+            <TouchableOpacity onPress={resetMarkers}>
               <MaterialIcons name="cancel" size={38} />
             </TouchableOpacity>
           </View>
           <View style={styles.distance}>
-            <Text>Distance: {distance / 1000}KM</Text>
+            <Text>Distance: {distance / 1000} KM</Text>
             <Text>Total Price: 100 Rs</Text>
           </View>
         </>
       )}
-      <View
-        style={{
-          borderBottomColor: "lightgray",
-          marginTop: 10,
-          borderBottomWidth: 1,
-          width: "100%",
-        }}
-      >
-        <Text
-          style={{
-            textAlign: "center",
-            marginBottom: 10,
-            fontSize: 16,
-            fontWeight: 600,
-          }}
-        >
-          Good Morning, Jost
-        </Text>
-      </View>
-      <View style={styles.placesContainer}>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={{ fontSize: 16 }}
-            placeholderTextColor="#000000"
-            placeholder="Where to ?"
-            value={inputText}
-            onChangeText={(text) => {
-              handleChange(text);
-              setInputText(text);
-            }}
-          />
-          <MaterialCommunityIcons
-            name="car-clock"
-            size={24}
-            style={{
-              color: "#7C7C7C",
-              borderLeftWidth: 1,
-              borderLeftColor: "#7C7C7C",
-              paddingLeft: 15,
-            }}
-          />
-        </View>
-        {places.length > 0 && (
-          <FlatList
-            style={styles.placesList}
-            data={places}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => {
-                  setPickup(item);
-                  calculateDistance(
-                    item.geocodes.main.latitude,
-                    item.geocodes.main.longitude
-                  );
-                  setPlaces([]);
-                  mapRef.current.animateToRegion(
-                    {
-                      latitude: item.geocodes.main.latitude,
-                      longitude: item.geocodes.main.longitude,
-                      latitudeDelta: 0.0922,
-                      longitudeDelta: 0.0421,
-                    },
-                    1000
-                  );
-                }}
-              >
-                <Text style={styles.placeText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.id}
-          />
-        )}
-        {!pickup && (
-          <View style={styles.descriptionContainer}>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 12,
-                alignItems: "center",
-              }}
-            >
-              <MaterialIcons name="work-outline" size={26} />
-              <View>
-                <Text style={{ fontSize: 20, fontWeight: "600" }}>Work</Text>
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: "gray",
-                    fontWeight: "600",
-                  }}
-                >
-                  1455 Market Street
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 12,
-                alignItems: "center",
-              }}
-            >
-              <MaterialCommunityIcons
-                name="clock-time-three-outline"
-                size={26}
-              />
-
-              <View>
-                <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                  1600 Michigan Street
-                </Text>
-                <Text
-                  style={{ fontSize: 12, color: "gray", fontWeight: "600" }}
-                >
-                  Sun Fransico
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
-      </View>
     </SafeAreaView>
   );
 };
@@ -279,50 +207,26 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
   map: {
     width: "100%",
-    height: "50%",
+    height: "100%",
   },
-  descriptionContainer: {
-    display: "flex",
-    gap: 16,
-    marginTop: 15,
-  },
-  placesContainer: {
-    padding: 15,
-  },
-  inputContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 3,
-    display: "flex",
-    flexDirection: "row",
-    gap: 12,
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    backgroundColor: "#E2E2E2",
-  },
-  placesList: {
+  directionBtn: {
+    position: "absolute",
     zIndex: 99999,
-    backgroundColor: "#E2E2E2",
-    padding: 10,
-    borderRadius: 3,
-    zIndex: 888,
-    top: 10,
-    left: 0,
-    maxHeight: 120,
-    overflow: "scroll",
-  },
-  placeText: {
+    right: 20,
+    bottom: 20,
     backgroundColor: "white",
-    borderRadius: 10,
-    marginBottom: 10,
-    padding: 6,
+    padding: 10,
+    borderRadius: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { height: 2, width: 0 },
   },
-  cancleBtn: {
+  cancelBtn: {
     position: "absolute",
     zIndex: 99999,
     right: 20,

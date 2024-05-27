@@ -68,6 +68,49 @@ const Index = () => {
               </Text>
             </View>
           </View>
+
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 12,
+              alignItems: "center",
+            }}
+          >
+            <MaterialCommunityIcons name="clock-time-three-outline" size={26} />
+
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                1600 Michigan Street
+              </Text>
+              <Text style={{ fontSize: 12, color: "gray", fontWeight: "600" }}>
+                Sun Fransico
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 12,
+              alignItems: "center",
+            }}
+          >
+            <MaterialIcons name="work-outline" size={26} />
+            <View>
+              <Text style={{ fontSize: 20, fontWeight: "600" }}>Work</Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "gray",
+                  fontWeight: "600",
+                }}
+              >
+                1455 Market Street
+              </Text>
+            </View>
+          </View>
+
           <View
             style={{
               display: "flex",
